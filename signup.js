@@ -1,4 +1,4 @@
-import { signup, onAuth } from "auth.js";
+import { signup } from "./auth.js";
 
 import {
   doc,
@@ -6,7 +6,7 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-import { db } from "firebase.js";
+import { db } from "./firebase.js";
 
 
 const form = document.getElementById("signup-form");
@@ -22,20 +22,11 @@ form.addEventListener("submit", async (e) => {
   errorEl.classList.remove("visible");
   successEl.classList.remove("visible");
 
-  const name =
-    document.getElementById("name").value.trim();
-
-  const birthDate =
-    document.getElementById("birth").value;
-
-  const gender =
-    document.getElementById("gender").value;
-
-  const email =
-    document.getElementById("email").value.trim();
-
-  const password =
-    document.getElementById("password").value;
+  const name = document.getElementById("name").value.trim();
+  const birthDate = document.getElementById("birth").value;
+  const gender = document.getElementById("gender").value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
 
   if (!name || !birthDate || !gender || !email || !password) {
@@ -64,7 +55,7 @@ form.addEventListener("submit", async (e) => {
 
   try {
 
-    /* ---------- CREATE AUTH ACCOUNT ---------- */
+    // 1. Create Firebase Auth account
 
     const user = await signup(
       email,
@@ -73,12 +64,11 @@ form.addEventListener("submit", async (e) => {
     );
 
 
-    /* ---------- CREATE FIRESTORE USER ---------- */
+    // 2. Create Firestore user document
 
     await setDoc(
       doc(db, "users", user.uid),
       {
-
         email,
         name,
         birthDate,
@@ -108,12 +98,11 @@ form.addEventListener("submit", async (e) => {
 
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
-
       }
     );
 
 
-    /* ---------- SUCCESS ---------- */
+    // 3. Success
 
     successEl.textContent =
       "Account created! Redirecting...";
@@ -130,28 +119,11 @@ form.addEventListener("submit", async (e) => {
 
     console.error(err);
 
-    console.log("CODE:", err.code);
-    console.log("MESSAGE:", err.message);
-
-
-    let msg =
-      err.message ||
-      "Signup failed. Please try again.";
-
-
-    if (err.code === "auth/email-already-in-use") {
-
-      msg =
-        "This email is already registered. Try logging in.";
-
-    }
-
-
     errorEl.textContent =
-      (err.code ? err.code + ": " : "") + msg;
+      (err.code ? err.code + ": " : "") +
+      (err.message || "Signup failed.");
 
     errorEl.classList.add("visible");
-
 
     btn.disabled = false;
     btn.textContent = "Create Account";
