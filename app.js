@@ -1,18 +1,7 @@
 // ===== Grindline — Main App (Firebase + Game Logic) =====
 
-import { onAuth, loadUserData, saveUserData, auth } from "./auth.js";
-
-// ---------- Luffy Forms ----------
-const FORMS = [
-  { id: "fake",          name: "Fake Luffy",       emoji: "👒", unlockedByLevel: 1  },
-  { id: "east_blue",     name: "East Blue Luffy",  emoji: "🍖", unlockedByLevel: 5  },
-  { id: "paradise",      name: "Paradise Luffy",   emoji: "⚔️", unlockedByLevel: 12 },
-  { id: "gear_second",   name: "Gear 2 Luffy",     emoji: "🔥", unlockedByLevel: 20 },
-  { id: "gear_third",    name: "Gear 3 Luffy",     emoji: "💥", unlockedByLevel: 30 },
-  { id: "gear_fourth",   name: "Gear 4 Luffy",     emoji: "🦍", unlockedByLevel: 45 },
-  { id: "wano",          name: "Wano Luffy",       emoji: "🏯", unlockedByLevel: 60 },
-  { id: "gear_five",     name: "Gear 5 Luffy",     emoji: "☀️", unlockedByLevel: 80 },
-];
+import { onAuth, loadUserData, saveUserData } from "./auth.js";
+import { characters } from "./characters.js";
 
 // ---------- Stamina config ----------
 const MAX_STAMINA = 100;
@@ -143,8 +132,8 @@ function addXP(amount) {
   return { leveledUp, newlyUnlocked };
 }
 
-function getCurrentForm() {
-  return FORMS.find((f) => f.id === state.currentFormId) || FORMS[0];
+function getCurrentCharacter() {
+  return characters[state.currentCharacterId] || null;
 }
 
 // ---------- Rest system ----------
@@ -231,9 +220,14 @@ function updateUI() {
     Math.min(100, (state.xp / state.xpToNext) * 100) + "%";
   document.getElementById("bounty").textContent = formatBounty(state.bounty);
 
-  const form = getCurrentForm();
-  document.getElementById("hero-emoji").textContent = form.emoji;
-  document.getElementById("current-form-name").textContent = form.name;
+  const character = getCurrentCharacter();
+
+if (character) {
+  document.getElementById("hero-image").src = character.image;
+  document.getElementById("hero-image").alt = character.name;
+  document.getElementById("current-character-name").textContent =
+    character.name;
+}
   document.getElementById("user-name").textContent = state.name || "Captain";
   document.getElementById("user-age").textContent = formatAge(calcAge(state.birthDate));
 
