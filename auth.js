@@ -1,3 +1,5 @@
+// auth.js — Shared authentication helpers
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -6,10 +8,17 @@ import {
   updateProfile,
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-import { auth } from "./firebase.js";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+import { auth, db } from "./firebase.js";
 
 
-/* ---------------- SIGNUP ---------------- */
+// ---------------- SIGNUP ----------------
 
 export async function signup(email, password, name) {
 
@@ -27,7 +36,7 @@ export async function signup(email, password, name) {
 }
 
 
-/* ---------------- LOGIN ---------------- */
+// ---------------- LOGIN ----------------
 
 export async function login(email, password) {
 
@@ -41,22 +50,51 @@ export async function login(email, password) {
 }
 
 
-/* ---------------- LOGOUT ---------------- */
+// ---------------- LOGOUT ----------------
 
 export async function logout() {
-
   await signOut(auth);
-
 }
 
 
-/* ---------------- AUTH STATE ---------------- */
+// ---------------- AUTH STATE ----------------
 
 export function onAuth(callback) {
-
   return onAuthStateChanged(auth, callback);
-
 }
 
 
-export { auth };
+// ---------------- LOAD USER DATA ----------------
+
+export async function loadUserData(uid) {
+
+  const snap = await getDoc(
+    doc(db, "users", uid)
+  );
+
+  if (snap.exists()) {
+    return snap.data();
+  }
+
+  return null;
+}
+
+
+// ---------------- SAVE USER DATA ----------------
+
+export async function saveUserData(uid, data) {
+
+  const ref = doc(db, "users", uid);
+
+  await setDoc(
+    ref,
+    {
+      ...data,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
+}
+
+
+export { auth, db };
