@@ -43,16 +43,22 @@ function getDefaultUserData(name, birthDate, email) {
   };
 }
 
+// ----- Create user document (can also be used as fallback) -----
+export async function createUserDocument(uid, name, birthDate, email) {
+  const userData = getDefaultUserData(name, birthDate, email);
+  await setDoc(doc(db, "users", uid), userData);
+  return userData;
+}
+
 // ----- Signup -----
-export async function signup(email, password, name, birthDate, gender) {
+export async function signup(email, password, name, birthDate) {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
 
   // Set displayName
   await updateProfile(cred.user, { displayName: name });
 
   // Create user document in Firestore
-  const userData = getDefaultUserData(name, birthDate, email, gender);
-  await setDoc(doc(db, "users", cred.user.uid), userData);
+  await createUserDocument(cred.user.uid, name, birthDate, email);
 
   return cred.user;
 }
