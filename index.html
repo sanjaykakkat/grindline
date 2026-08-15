@@ -7,10 +7,18 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Pirata+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app">
+  <!-- Loading state while checking auth -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="loading-emoji">⚓</div>
+      <p>Loading your journey...</p>
+    </div>
+  </div>
+
+  <div class="app hidden" id="app">
 
     <!-- ===== TOP STATUS ===== -->
     <header class="top-status">
@@ -37,13 +45,10 @@
     <section class="hero">
       <div class="hero-avatar" id="hero-avatar">
         <span class="hero-emoji" id="hero-emoji">👒</span>
-        <!-- Ready for real image later:
-        <img id="hero-img" src="luffy-beginner.png" alt="Luffy" />
-        -->
       </div>
 
       <h1 class="user-name" id="user-name">Captain</h1>
-      <p class="user-age" id="user-age">Set your birth date to see how long you've lived</p>
+      <p class="user-age" id="user-age">—</p>
 
       <div class="current-form">
         <span class="form-label">Current Form</span>
@@ -53,21 +58,6 @@
 
     <!-- ===== MAIN CONTENT ===== -->
     <main class="main">
-
-      <!-- Setup (shown only first time) -->
-      <section class="card setup-card" id="setup-card">
-        <h2>Welcome, future Pirate King</h2>
-        <p class="setup-desc">Tell me who you are so we can track your journey.</p>
-        <div class="form-group">
-          <label for="input-name">Your Name</label>
-          <input type="text" id="input-name" placeholder="e.g. Monkey D. You" maxlength="30" />
-        </div>
-        <div class="form-group">
-          <label for="input-birth">Birth Date</label>
-          <input type="date" id="input-birth" />
-        </div>
-        <button id="save-setup-btn" class="btn primary full">Set Sail</button>
-      </section>
 
       <!-- Focus Session -->
       <section class="card task-card">
@@ -92,12 +82,24 @@
             </div>
             <button id="start-btn" class="btn primary">Start Focus</button>
           </div>
-          <div class="stamina-row">
-            <span class="stamina-label">Stamina</span>
-            <div class="stamina-bar">
-              <div id="stamina-fill" class="stamina-fill"></div>
+
+          <!-- Stamina + Rest -->
+          <div class="stamina-section">
+            <div class="stamina-row">
+              <span class="stamina-label">Stamina</span>
+              <div class="stamina-bar">
+                <div id="stamina-fill" class="stamina-fill"></div>
+              </div>
+              <span id="stamina" class="stamina-value">100/100</span>
             </div>
-            <span id="stamina" class="stamina-value">100/100</span>
+
+            <div id="rest-area" class="rest-area hidden">
+              <p id="rest-message" class="rest-message">You’re out of stamina. Take a real break.</p>
+              <button id="rest-btn" class="btn rest-btn">Rest (25 min)</button>
+              <div id="rest-timer" class="rest-timer hidden">
+                Resting… <span id="rest-countdown">25:00</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -113,16 +115,14 @@
         </div>
       </section>
 
-      <!-- Character Ladder / Shop -->
+      <!-- Character Ladder -->
       <section class="card ladder-card">
         <h2>Luffy Forms</h2>
-        <p class="section-desc">Focus more → Level up → Unlock stronger forms. Each form is a milestone of real work.</p>
-        <div id="ladder" class="ladder">
-          <!-- Populated by JS -->
-        </div>
+        <p class="section-desc">Focus more → Level up → Unlock stronger forms.</p>
+        <div id="ladder" class="ladder"></div>
       </section>
 
-      <!-- Simple stats -->
+      <!-- Voyage Stats -->
       <section class="card stats-card">
         <h2>Voyage Stats</h2>
         <div class="mini-stats">
@@ -150,6 +150,7 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
-</html>
+  </html>
+    
