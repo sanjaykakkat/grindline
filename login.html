@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Grindline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">⚓</div>
+      <h1>Welcome back</h1>
+      <p>Log in to continue your journey</p>
+    </div>
+
+    <div id="error" class="error-msg"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required minlength="6" autocomplete="current-password" />
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="login-btn">Log In</button>
+    </form>
+
+    <div class="auth-footer">
+      Don’t have an account? <a href="signup.html">Sign up</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { login, onAuth } from "./auth.js";
+
+    // If already logged in → go to app
+    onAuth((user) => {
+      if (user) {
+        window.location.href = "index.html";
+      }
+    });
+
+    const form = document.getElementById("login-form");
+    const errorEl = document.getElementById("error");
+    const btn = document.getElementById("login-btn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.classList.remove("visible");
+      errorEl.textContent = "";
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      btn.disabled = true;
+      btn.textContent = "Logging in...";
+
+      try {
+        await login(email, password);
+        // onAuth will redirect
+      } catch (err) {
+        let msg = "Login failed. Please try again.";
+        if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+          msg = "Incorrect email or password.";
+        } else if (err.code === "auth/too-many-requests") {
+          msg = "Too many attempts. Try again later.";
+        } else if (err.code === "auth/invalid-email") {
+          msg = "Invalid email address.";
+        }
+        errorEl.textContent = msg;
+        errorEl.classList.add("visible");
+        btn.disabled = false;
+        btn.textContent = "Log In";
+      }
+    });
+  </script>
+</body>
+</html>
+
