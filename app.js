@@ -88,8 +88,9 @@ function queueSave() {
         bounty: state.bounty,
         stamina: state.stamina,
         maxStamina: state.maxStamina,
-        currentFormId: state.currentFormId,
-        unlockedForms: state.unlockedForms,
+        gender: state.gender,
+        currentCharacterId: state.currentCharacterId,
+        unlockedCharacters: state.unlockedCharacters,
         totalFocusMinutes: state.totalFocusMinutes,
         totalSessions: state.totalSessions,
         lastStaminaUpdate: state.lastStaminaUpdate,
@@ -111,24 +112,52 @@ function calculateRewards(minutes) {
   return { bounty, xp, staminaCost };
 }
 
+// ---------- Character system ----------
+
+function getCharactersForGender(gender) {
+  return Object.values(characters)
+    .filter(character => character.gender === gender);
+}
+
+function checkCharacterUnlocks() {
+  const availableCharacters =
+    getCharactersForGender(state.gender);
+
+  const newlyUnlocked = [];
+
+  availableCharacters.forEach((character) => {
+
+    if (
+      character.levelRequired <= state.level &&
+      !state.unlockedCharacters.includes(character.id)
+    ) {
+      state.unlockedCharacters.push(character.id);
+      newlyUnlocked.push(character);
+    }
+
+  });
+
+  return newlyUnlocked;
+}
+
 function addXP(amount) {
   state.xp += amount;
+
   let leveledUp = false;
   const newlyUnlocked = [];
 
   while (state.xp >= state.xpToNext) {
+
     state.xp -= state.xpToNext;
     state.level += 1;
     state.xpToNext = xpForLevel(state.level);
     leveledUp = true;
 
-    FORMS.forEach((form) => {
-      if (form.unlockedByLevel <= state.level && !state.unlockedForms.includes(form.id)) {
-        state.unlockedForms.push(form.id);
-        newlyUnlocked.push(form);
-      }
-    });
+    const unlocked = checkCharacterUnlocks();
+
+    newlyUnlocked.push(...unlocked);
   }
+
   return { leveledUp, newlyUnlocked };
 }
 
@@ -237,7 +266,8 @@ if (character) {
 
   document.getElementById("total-focus").textContent = state.totalFocusMinutes + " min";
   document.getElementById("total-sessions").textContent = state.totalSessions;
-  document.getElementById("forms-unlocked").textContent = state.unlockedForms.length;
+  document.getElementById("forms-unlocked").textContent = state.unlockedCharacters.length;
+  
 
   // Disable start button while resting or no stamina
   const startBtn = document.getElementById("start-btn");
@@ -250,54 +280,130 @@ if (character) {
 
 function renderLadder() {
   const container = document.getElementById("ladder");
-  container.innerHTML = FORMS.map((form) => {
-    const unlocked = state.unlockedForms.includes(form.id);
-    const isCurrent = state.currentFormId === form.id;
+
+  const availableCharacters =
+    getCharactersForGender(state.gender);
+
+  container.innerHTML = availableCharacters.map((character) => {
+
+    const unlocked =
+      state.unlockedCharacters.includes(character.id);
+
+    const isCurrent =
+      state.currentCharacterId === character.id;
 
     let statusClass = "locked";
-    if (isCurrent) statusClass = "current";
-    else if (unlocked) statusClass = "unlocked";
 
-    let reqText = `Unlocks at Level ${form.unlockedByLevel}`;
-    if (unlocked && isCurrent) reqText = "Currently active";
-    else if (unlocked) reqText = "Unlocked — tap to equip";
+    if (isCurrent) {
+      statusClass = "current";
+    } else if (unlocked) {
+      statusClass = "unlocked";
+    }
+
+    let reqText = `Unlocks at Level ${character.levelRequired}`;
+
+    if (unlocked && isCurrent) {
+      reqText = "Currently active";
+    } else if (unlocked) {
+      reqText = "Unlocked — tap to equip";
+    }
 
     return `
-      <div class="ladder-item ${statusClass}" data-form="${form.id}">
-        <div class="ladder-emoji">${form.emoji}</div>
+      <div
+        class="ladder-item ${statusClass}"
+        data-character="${character.id}"
+      >
+
+        <img
+          class="ladder-character"
+          src="${character.image}"
+          alt="${character.name}"
+        >
+
         <div class="ladder-info">
-          <div class="ladder-name">${form.name}</div>
-          <div class="ladder-req">${reqText}</div>
+          <div class="ladder-name">
+            ${character.name}
+          </div>
+
+          <div class="ladder-req">
+            ${reqText}
+          </div>
         </div>
-        ${unlocked && !isCurrent ? `<button class="btn equip" data-equip="${form.id}">Equip</button>` : ""}
-        ${!unlocked ? `<span style="font-size:0.75rem;font-weight:700;color:var(--text-muted)">Lv ${form.unlockedByLevel}</span>` : ""}
+
+        ${
+          unlocked && !isCurrent
+            ? `<button
+                 class="btn equip"
+                 data-equip="${character.id}"
+               >
+                 Equip
+               </button>`
+            : ""
+        }
+
+        ${
+          !unlocked
+            ? `<span style="font-size:0.75rem;font-weight:700;color:var(--text-muted)">
+                 Lv ${character.levelRequired}
+               </span>`
+            : ""
+        }
+
       </div>
     `;
+
   }).join("");
 
   container.querySelectorAll("[data-equip]").forEach((btn) => {
+
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      equipForm(btn.dataset.equip);
+      equipCharacter(btn.dataset.equip);
     });
+
   });
 
   container.querySelectorAll(".ladder-item.unlocked").forEach((row) => {
+
     row.style.cursor = "pointer";
+
     row.addEventListener("click", () => {
-      const id = row.dataset.form;
-      if (id && id !== state.currentFormId) equipForm(id);
+
+      const id = row.dataset.character;
+
+      if (
+        id &&
+        id !== state.currentCharacterId
+      ) {
+        equipCharacter(id);
+      }
+
     });
+
   });
 }
 
-function equipForm(id) {
-  if (!state.unlockedForms.includes(id)) return;
-  state.currentFormId = id;
+function equipCharacter(id) {
+
+  if (!state.unlockedCharacters.includes(id)) {
+    return;
+  }
+
+  const character = characters[id];
+
+  if (!character) {
+    return;
+  }
+
+  state.currentCharacterId = id;
+
   queueSave();
   updateUI();
-  const form = FORMS.find((f) => f.id === id);
-  showToast(`Equipped ${form.name}`, "success");
+
+  showToast(
+    `Equipped ${character.name}`,
+    "success"
+  );
 }
 
 // ---------- Focus session ----------
@@ -367,7 +473,7 @@ function completeSession() {
   state.totalSessions += 1;
 
   if (newlyUnlocked.length > 0) {
-    state.currentFormId = newlyUnlocked[newlyUnlocked.length - 1].id;
+  state.currentCharacterId = newlyUnlocked[newlyUnlocked.length - 1].id;
   }
 
   queueSave();
@@ -381,7 +487,7 @@ function completeSession() {
   let msg = `+${formatBounty(bounty)}  ·  +${xp} XP`;
   if (leveledUp) msg += `  ·  LEVEL ${state.level}!`;
   if (newlyUnlocked.length > 0) {
-    msg += `  ·  New form: ${newlyUnlocked[newlyUnlocked.length - 1].name}`;
+    msg += `  ·  New character: ${newlyUnlocked[newlyUnlocked.length - 1].name}`;
   }
   showToast(msg, newlyUnlocked.length ? "success" : "gold");
 }
@@ -436,8 +542,9 @@ onAuth(async (user) => {
       bounty: data.bounty ?? 0,
       stamina: data.stamina ?? 100,
       maxStamina: data.maxStamina ?? 100,
-      currentFormId: data.currentFormId || "fake",
-      unlockedForms: data.unlockedForms || ["fake"],
+      gender: data.gender || "male",
+      currentCharacterId: data.currentCharacterId || (data.gender === "female"? "nami_001": "luffy_001"),
+      unlockedCharacters: data.unlockedCharacters ||[data.gender === "female"? "nami_001": "luffy_001"],
       totalFocusMinutes: data.totalFocusMinutes ?? 0,
       totalSessions: data.totalSessions ?? 0,
       lastStaminaUpdate: data.lastStaminaUpdate || Date.now(),
