@@ -23,6 +23,7 @@ function getDefaultUserData(name, birthDate, email) {
     email,
     name,
     birthDate,
+    gender,
     level: 1,
     xp: 0,
     xpToNext: 100,
@@ -43,14 +44,14 @@ function getDefaultUserData(name, birthDate, email) {
 }
 
 // ----- Signup -----
-export async function signup(email, password, name, birthDate) {
+export async function signup(email, password, name, birthDate, gender) {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
 
   // Set displayName
   await updateProfile(cred.user, { displayName: name });
 
   // Create user document in Firestore
-  const userData = getDefaultUserData(name, birthDate, email);
+  const userData = getDefaultUserData(name, birthDate, email, gender);
   await setDoc(doc(db, "users", cred.user.uid), userData);
 
   return cred.user;
