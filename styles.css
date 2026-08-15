@@ -406,6 +406,26 @@ input:focus, select:focus {
 }
 
 /* ===== LADDER ===== */
+
+.ladder-character {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ladder-character img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 .ladder {
   display: flex;
   flex-direction: column;
@@ -436,18 +456,6 @@ input:focus, select:focus {
 
 .ladder-item.locked {
   opacity: 0.65;
-}
-
-.ladder-emoji {
-  font-size: 2rem;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border-radius: 12px;
-  flex-shrink: 0;
 }
 
 .ladder-info {
