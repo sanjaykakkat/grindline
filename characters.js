@@ -13,7 +13,7 @@ export const characters = {
     gender: "male",
     levelRequired: 1,
     tier: "fake",
-    image: "./images/characters/luffy_001.png"
+    image: "https://res.cloudinary.com/wbr5igfj/image/upload/v1786815366/1000064927.png"
   },
 
   luffy_002: {
