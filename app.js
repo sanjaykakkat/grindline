@@ -1,76 +1,92 @@
-// ===== Grindline — Core Game State & Logic =====
+// ===== Grindline — One Piece Personal Version =====
 
-const STORAGE_KEY = "grindline_v1";
+const STORAGE_KEY = "grindline_op_v1";
 
-// Character catalog (original, non-copyrighted pirate-themed)
-const CHARACTERS = [
+// Luffy forms ladder (personal theme)
+// unlockedByLevel = the level required to unlock this form
+const FORMS = [
   {
-    id: "deckhand",
-    name: "Deckhand Dreg",
-    emoji: "🦜",
-    price: 5000,
-    desc: "A scrappy starter. Better than nothing.",
+    id: "fake",
+    name: "Fake Luffy",
+    emoji: "👒",
+    unlockedByLevel: 1,
+    desc: "The beginning. A dream and a straw hat.",
   },
   {
-    id: "cabin_boy",
-    name: "Cabin Boy Finn",
-    emoji: "🧒",
-    price: 25000,
-    desc: "Eager and quick. First real crew member.",
+    id: "east_blue",
+    name: "East Blue Luffy",
+    emoji: "🍖",
+    unlockedByLevel: 5,
+    desc: "First real steps. The journey has begun.",
   },
   {
-    id: "gunner",
-    name: "Gunner Grit",
-    emoji: "💣",
-    price: 100000,
-    desc: "Steady aim. Proven under pressure.",
-  },
-  {
-    id: "navigator",
-    name: "Navigator Nyx",
-    emoji: "🧭",
-    price: 350000,
-    desc: "Reads the stars. Never lost.",
-  },
-  {
-    id: "first_mate",
-    name: "First Mate Rook",
+    id: "paradise",
+    name: "Paradise Luffy",
     emoji: "⚔️",
-    price: 1000000,
-    desc: "Loyal and lethal. Commands respect.",
+    unlockedByLevel: 12,
+    desc: "Stronger. Facing the Grand Line.",
   },
   {
-    id: "captain",
-    name: "Captain Voss",
-    emoji: "🏴‍☠️",
-    price: 5000000,
-    desc: "Legend of the seas. True proof of the grind.",
+    id: "gear_second",
+    name: "Gear 2 Luffy",
+    emoji: "🔥",
+    unlockedByLevel: 20,
+    desc: "Speed and power. A new level of fighting.",
+  },
+  {
+    id: "gear_third",
+    name: "Gear 3 Luffy",
+    emoji: "💥",
+    unlockedByLevel: 30,
+    desc: "Giant strength. Bones of a warrior.",
+  },
+  {
+    id: "gear_fourth",
+    name: "Gear 4 Luffy",
+    emoji: "🦍",
+    unlockedByLevel: 45,
+    desc: "Boundman. The power that turns the tide.",
+  },
+  {
+    id: "wano",
+    name: "Wano Luffy",
+    emoji: "🏯",
+    unlockedByLevel: 60,
+    desc: "Protector of Wano. A captain worthy of the name.",
+  },
+  {
+    id: "gear_five",
+    name: "Gear 5 Luffy",
+    emoji: "☀️",
+    unlockedByLevel: 80,
+    desc: "Joy Boy. The one who will be Pirate King.",
   },
 ];
 
-// Default state
 function defaultState() {
   return {
+    name: "",
+    birthDate: "",          // YYYY-MM-DD
     level: 1,
     xp: 0,
     xpToNext: 100,
     bounty: 0,
     stamina: 100,
     maxStamina: 100,
-    inventory: [], // array of character ids
-    equipped: null, // character id
+    currentFormId: "fake",  // always starts with Fake Luffy
+    unlockedForms: ["fake"],
+    totalFocusMinutes: 0,
+    totalSessions: 0,
     lastStaminaUpdate: Date.now(),
+    setupDone: false,
   };
 }
 
-// Load / Save
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultState();
-    const data = JSON.parse(raw);
-    // Merge with defaults in case new fields are added later
-    return { ...defaultState(), ...data };
+    return { ...defaultState(), ...JSON.parse(raw) };
   } catch {
     return defaultState();
   }
@@ -80,17 +96,40 @@ function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-// ===== Game Logic =====
+// ===== Age calculation (Y / M / D) =====
+function calcAge(birthDateStr) {
+  if (!birthDateStr) return null;
+  const birth = new Date(birthDateStr + "T00:00:00");
+  const now = new Date();
 
-let state = loadState();
-let timerInterval = null;
-let remainingSeconds = 0;
-let isPaused = false;
-let currentTaskName = "";
-let currentTaskMinutes = 25;
+  let years = now.getFullYear() - birth.getFullYear();
+  let months = now.getMonth() - birth.getMonth();
+  let days = now.getDate() - birth.getDate();
 
-// Stamina recovery: 1 stamina every 3 minutes while not focusing
-const STAMINA_RECOVERY_MS = 3 * 60 * 1000;
+  if (days < 0) {
+    months -= 1;
+    // days in previous month
+    const prev = new Date(now.getFullYear(), now.getMonth(), 0);
+    days += prev.getDate();
+  }
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+
+  return { years, months, days };
+}
+
+function formatAge(age) {
+  if (!age) return "Set your birth date to see how long you've lived";
+  const y = age.years === 1 ? "1 year" : `${age.years} years`;
+  const m = age.months === 1 ? "1 month" : `${age.months} months`;
+  const d = age.days === 1 ? "1 day" : `${age.days} days`;
+  return `${y} · ${m} · ${d}`;
+}
+
+// ===== Game helpers =====
+const STAMINA_RECOVERY_MS = 3 * 60 * 1000; // 1 stamina / 3 min
 
 function recoverStamina() {
   const now = Date.now();
@@ -105,35 +144,45 @@ function recoverStamina() {
   }
 }
 
-// XP curve: simple linear-ish growth
 function xpForLevel(level) {
-  return Math.floor(100 * Math.pow(1.15, level - 1));
+  return Math.floor(100 * Math.pow(1.18, level - 1));
 }
 
 function addXP(amount) {
   state.xp += amount;
-  let leveled = false;
+  let leveledUp = false;
+  const newlyUnlocked = [];
+
   while (state.xp >= state.xpToNext) {
     state.xp -= state.xpToNext;
     state.level += 1;
     state.xpToNext = xpForLevel(state.level);
-    leveled = true;
+    leveledUp = true;
+
+    // Check for new forms
+    FORMS.forEach((form) => {
+      if (
+        form.unlockedByLevel <= state.level &&
+        !state.unlockedForms.includes(form.id)
+      ) {
+        state.unlockedForms.push(form.id);
+        newlyUnlocked.push(form);
+      }
+    });
   }
-  return leveled;
+
+  return { leveledUp, newlyUnlocked };
 }
 
-// Rewards based on minutes focused
 function calculateRewards(minutes) {
-  // Base: 1000 bounty + 1 XP per minute, scaled a bit
-  const bounty = Math.round(minutes * 1000 * (1 + (state.level - 1) * 0.02));
-  const xp = Math.round(minutes * 1.2);
-  const staminaCost = Math.max(5, Math.round(minutes * 0.5)); // ~0.5 stamina per min
+  const bounty = Math.round(minutes * 1200 * (1 + (state.level - 1) * 0.025));
+  const xp = Math.round(minutes * 1.4);
+  const staminaCost = Math.max(5, Math.round(minutes * 0.5));
   return { bounty, xp, staminaCost };
 }
 
-// ===== UI Helpers =====
-
 function formatBounty(n) {
+  if (n >= 1_000_000_000) return "฿" + (n / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
   if (n >= 1_000_000) return "฿" + (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
   if (n >= 1_000) return "฿" + (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
   return "฿" + n.toLocaleString();
@@ -151,139 +200,153 @@ function showToast(message, type = "") {
   el.className = "toast " + type;
   el.classList.remove("hidden");
   clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => {
-    el.classList.add("hidden");
-  }, 3200);
+  showToast._t = setTimeout(() => el.classList.add("hidden"), 3400);
+}
+
+// ===== UI =====
+
+let state = loadState();
+let timerInterval = null;
+let remainingSeconds = 0;
+let isPaused = false;
+let currentTaskName = "";
+let currentTaskMinutes = 25;
+
+function getCurrentForm() {
+  return FORMS.find((f) => f.id === state.currentFormId) || FORMS[0];
 }
 
 function updateUI() {
   recoverStamina();
 
+  // Top stats
   document.getElementById("level").textContent = state.level;
-  document.getElementById("xp-text").textContent = `${state.xp} / ${state.xpToNext}`;
-  const xpPct = Math.min(100, (state.xp / state.xpToNext) * 100);
-  document.getElementById("xp-fill").style.width = xpPct + "%";
-
+  document.getElementById("xp-text").textContent = `${state.xp} / ${state.xpToNext} XP`;
+  document.getElementById("xp-fill").style.width =
+    Math.min(100, (state.xp / state.xpToNext) * 100) + "%";
   document.getElementById("bounty").textContent = formatBounty(state.bounty);
-  document.getElementById("stamina").textContent = `${state.stamina}/${state.maxStamina}`;
-  const stamPct = (state.stamina / state.maxStamina) * 100;
-  document.getElementById("stamina-fill").style.width = stamPct + "%";
 
-  // Equipped character
-  const eqEl = document.getElementById("equipped-character");
-  if (state.equipped) {
-    const char = CHARACTERS.find((c) => c.id === state.equipped);
-    if (char) {
-      eqEl.innerHTML = `
-        <div class="char-avatar">${char.emoji}</div>
-        <div class="char-info">
-          <div class="char-name">${char.name}</div>
-          <div class="char-desc">${char.desc}</div>
-        </div>
-      `;
-    }
+  // Hero
+  const form = getCurrentForm();
+  document.getElementById("hero-emoji").textContent = form.emoji;
+  document.getElementById("current-form-name").textContent = form.name;
+
+  document.getElementById("user-name").textContent = state.name || "Captain";
+  const age = calcAge(state.birthDate);
+  document.getElementById("user-age").textContent = formatAge(age);
+
+  // Stamina
+  document.getElementById("stamina").textContent = `${state.stamina}/${state.maxStamina}`;
+  document.getElementById("stamina-fill").style.width =
+    (state.stamina / state.maxStamina) * 100 + "%";
+
+  // Setup card visibility
+  const setupCard = document.getElementById("setup-card");
+  if (state.setupDone) {
+    setupCard.classList.add("hidden");
   } else {
-    eqEl.innerHTML = `
-      <div class="char-avatar">🏴‍☠️</div>
-      <div class="char-info">
-        <div class="char-name">No one equipped</div>
-        <div class="char-desc">Buy a character in the shop!</div>
-      </div>
-    `;
+    setupCard.classList.remove("hidden");
   }
 
-  renderShop();
-  renderInventory();
+  // Voyage stats
+  document.getElementById("total-focus").textContent = state.totalFocusMinutes + " min";
+  document.getElementById("total-sessions").textContent = state.totalSessions;
+  document.getElementById("forms-unlocked").textContent = state.unlockedForms.length;
+
+  renderLadder();
 }
 
-function renderShop() {
-  const grid = document.getElementById("shop-grid");
-  grid.innerHTML = CHARACTERS.map((char) => {
-    const owned = state.inventory.includes(char.id);
+function renderLadder() {
+  const container = document.getElementById("ladder");
+  container.innerHTML = FORMS.map((form) => {
+    const unlocked = state.unlockedForms.includes(form.id);
+    const isCurrent = state.currentFormId === form.id;
+    const locked = !unlocked;
+
+    let statusClass = "locked";
+    if (isCurrent) statusClass = "current";
+    else if (unlocked) statusClass = "unlocked";
+
+    let reqText = `Unlocks at Level ${form.unlockedByLevel}`;
+    if (unlocked && isCurrent) reqText = "Currently active";
+    else if (unlocked) reqText = "Unlocked — tap to equip";
+
     return `
-      <div class="shop-item ${owned ? "owned" : ""}">
-        <div class="avatar">${char.emoji}</div>
-        <div class="name">${char.name}</div>
-        <div class="price">${owned ? "OWNED" : formatBounty(char.price)}</div>
-        <div class="desc">${char.desc}</div>
+      <div class="ladder-item ${statusClass}" data-form="${form.id}">
+        <div class="ladder-emoji">${form.emoji}</div>
+        <div class="ladder-info">
+          <div class="ladder-name">${form.name}</div>
+          <div class="ladder-req">${reqText}</div>
+        </div>
         ${
-          owned
-            ? `<button class="btn equip" data-equip="${char.id}">${state.equipped === char.id ? "Equipped" : "Equip"}</button>`
-            : `<button class="btn shop-buy" data-buy="${char.id}" ${state.bounty < char.price ? "disabled" : ""}>Buy</button>`
+          unlocked && !isCurrent
+            ? `<button class="btn equip" data-equip="${form.id}">Equip</button>`
+            : ""
+        }
+        ${
+          locked
+            ? `<span style="font-size:0.75rem;font-weight:700;color:var(--text-muted)">Lv ${form.unlockedByLevel}</span>`
+            : ""
         }
       </div>
     `;
   }).join("");
 
-  // Bind buy / equip
-  grid.querySelectorAll("[data-buy]").forEach((btn) => {
-    btn.addEventListener("click", () => buyCharacter(btn.dataset.buy));
+  container.querySelectorAll("[data-equip]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      equipForm(btn.dataset.equip);
+    });
   });
-  grid.querySelectorAll("[data-equip]").forEach((btn) => {
-    btn.addEventListener("click", () => equipCharacter(btn.dataset.equip));
+
+  // Also allow clicking the whole unlocked row to equip
+  container.querySelectorAll(".ladder-item.unlocked").forEach((row) => {
+    row.style.cursor = "pointer";
+    row.addEventListener("click", () => {
+      const id = row.dataset.form;
+      if (id && id !== state.currentFormId) equipForm(id);
+    });
   });
 }
 
-function renderInventory() {
-  const grid = document.getElementById("inventory");
-  if (state.inventory.length === 0) {
-    grid.innerHTML = `<p class="empty-msg">No characters yet. Buy one from the shop!</p>`;
-    return;
-  }
-
-  grid.innerHTML = state.inventory
-    .map((id) => {
-      const char = CHARACTERS.find((c) => c.id === id);
-      if (!char) return "";
-      const isEq = state.equipped === id;
-      return `
-        <div class="inv-item ${isEq ? "equipped" : ""}">
-          <div class="avatar">${char.emoji}</div>
-          <div class="name">${char.name}</div>
-          <button class="btn equip" data-equip="${id}">${isEq ? "Equipped" : "Equip"}</button>
-        </div>
-      `;
-    })
-    .join("");
-
-  grid.querySelectorAll("[data-equip]").forEach((btn) => {
-    btn.addEventListener("click", () => equipCharacter(btn.dataset.equip));
-  });
+function equipForm(id) {
+  if (!state.unlockedForms.includes(id)) return;
+  state.currentFormId = id;
+  saveState(state);
+  updateUI();
+  const form = FORMS.find((f) => f.id === id);
+  showToast(`Equipped ${form.name}`, "success");
 }
 
 // ===== Actions =====
 
-function buyCharacter(id) {
-  const char = CHARACTERS.find((c) => c.id === id);
-  if (!char) return;
-  if (state.inventory.includes(id)) {
-    showToast("You already own this character.");
+function saveSetup() {
+  const name = document.getElementById("input-name").value.trim();
+  const birth = document.getElementById("input-birth").value;
+
+  if (!name) {
+    showToast("Please enter your name");
     return;
   }
-  if (state.bounty < char.price) {
-    showToast("Not enough Bounty. Keep grinding!", "gold");
+  if (!birth) {
+    showToast("Please set your birth date");
     return;
   }
 
-  state.bounty -= char.price;
-  state.inventory.push(id);
-  if (!state.equipped) state.equipped = id; // auto-equip first purchase
+  state.name = name;
+  state.birthDate = birth;
+  state.setupDone = true;
   saveState(state);
   updateUI();
-  showToast(`Unlocked ${char.name}! 🎉`, "success");
+  showToast(`Welcome aboard, ${name}!`, "success");
 }
 
-function equipCharacter(id) {
-  if (!state.inventory.includes(id)) return;
-  state.equipped = id;
-  saveState(state);
-  updateUI();
-  const char = CHARACTERS.find((c) => c.id === id);
-  showToast(`Equipped ${char.name}`);
-}
-
-// Timer
 function startFocus() {
+  if (!state.setupDone) {
+    showToast("Finish setup first");
+    return;
+  }
+
   const nameInput = document.getElementById("task-name");
   const minutesSelect = document.getElementById("task-minutes");
   const name = nameInput.value.trim() || "Focus Session";
@@ -291,7 +354,7 @@ function startFocus() {
 
   const { staminaCost } = calculateRewards(minutes);
   if (state.stamina < staminaCost) {
-    showToast(`Not enough Stamina (need ${staminaCost}). Take a break!`);
+    showToast(`Not enough Stamina (need ${staminaCost}). Rest a bit!`);
     return;
   }
 
@@ -306,7 +369,6 @@ function startFocus() {
   document.getElementById("timer-display").textContent = formatTime(remainingSeconds);
   document.getElementById("pause-btn").textContent = "Pause";
 
-  // Deduct stamina at start (or we could do it on complete — doing at start prevents abuse)
   state.stamina -= staminaCost;
   state.lastStaminaUpdate = Date.now();
   saveState(state);
@@ -319,13 +381,13 @@ function startFocus() {
 function tick() {
   if (isPaused) return;
   remainingSeconds -= 1;
-  document.getElementById("timer-display").textContent = formatTime(Math.max(0, remainingSeconds));
+  document.getElementById("timer-display").textContent =
+    formatTime(Math.max(0, remainingSeconds));
 
   if (remainingSeconds <= 0) {
     clearInterval(timerInterval);
     timerInterval = null;
-    // Auto-complete when timer hits zero
-    completeSession(true);
+    completeSession();
   }
 }
 
@@ -334,36 +396,44 @@ function togglePause() {
   document.getElementById("pause-btn").textContent = isPaused ? "Resume" : "Pause";
 }
 
-function completeSession(fromTimer = false) {
+function completeSession() {
   clearInterval(timerInterval);
   timerInterval = null;
 
   const minutes = currentTaskMinutes;
-  // If user completes early, still give full rewards for chosen duration
-  // (simple v1 behavior — can be refined later)
   const { bounty, xp } = calculateRewards(minutes);
 
-  const leveled = addXP(xp);
+  const { leveledUp, newlyUnlocked } = addXP(xp);
   state.bounty += bounty;
+  state.totalFocusMinutes += minutes;
+  state.totalSessions += 1;
+
+  // Auto-equip the highest newly unlocked form (feels rewarding)
+  if (newlyUnlocked.length > 0) {
+    const best = newlyUnlocked[newlyUnlocked.length - 1];
+    state.currentFormId = best.id;
+  }
+
   saveState(state);
 
-  // Reset UI
   document.getElementById("timer-view").classList.add("hidden");
   document.getElementById("task-setup").classList.remove("hidden");
   document.getElementById("task-name").value = "";
 
   updateUI();
 
-  let msg = `+${formatBounty(bounty)} Bounty  •  +${xp} XP`;
-  if (leveled) msg += `  •  LEVEL UP! → ${state.level}`;
-  showToast(msg, "gold");
+  let msg = `+${formatBounty(bounty)}  ·  +${xp} XP`;
+  if (leveledUp) msg += `  ·  LEVEL ${state.level}!`;
+  if (newlyUnlocked.length > 0) {
+    msg += `  ·  New form: ${newlyUnlocked[newlyUnlocked.length - 1].name}`;
+  }
+  showToast(msg, newlyUnlocked.length ? "success" : "gold");
 }
 
 function cancelSession() {
   clearInterval(timerInterval);
   timerInterval = null;
 
-  // Refund stamina on cancel (fair)
   const { staminaCost } = calculateRewards(currentTaskMinutes);
   state.stamina = Math.min(state.maxStamina, state.stamina + staminaCost);
   state.lastStaminaUpdate = Date.now();
@@ -376,13 +446,13 @@ function cancelSession() {
 }
 
 // ===== Init =====
-
+document.getElementById("save-setup-btn").addEventListener("click", saveSetup);
 document.getElementById("start-btn").addEventListener("click", startFocus);
 document.getElementById("pause-btn").addEventListener("click", togglePause);
-document.getElementById("complete-btn").addEventListener("click", () => completeSession(false));
+document.getElementById("complete-btn").addEventListener("click", completeSession);
 document.getElementById("cancel-btn").addEventListener("click", cancelSession);
 
-// Recover stamina periodically while the page is open
+// Stamina recovery tick
 setInterval(() => {
   recoverStamina();
   updateUI();
@@ -390,4 +460,3 @@ setInterval(() => {
 
 // Initial render
 updateUI();
-
