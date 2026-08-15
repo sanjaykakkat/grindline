@@ -140,6 +140,27 @@ body {
   overflow: hidden;
 }
 
+/* ===== Character Image ===== */
+
+.character-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  min-height: 280px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+#hero-image {
+  display: block;
+  width: auto;
+  height: 280px;
+  max-width: 90%;
+  object-fit: contain;
+  object-position: bottom center;
+}
+
 .hero-emoji {
   font-size: 4.5rem;
   line-height: 1;
