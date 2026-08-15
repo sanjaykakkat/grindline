@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grindline — Pirate Productivity RPG</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <!-- Header / Status Bar -->
+    <header class="status-bar">
+      <div class="brand">
+        <span class="logo">⚓</span>
+        <h1>Grindline</h1>
+      </div>
+      <div class="stats">
+        <div class="stat" title="Level & XP">
+          <span class="stat-label">LVL</span>
+          <span id="level" class="stat-value">1</span>
+          <div class="xp-bar">
+            <div id="xp-fill" class="xp-fill"></div>
+          </div>
+          <span id="xp-text" class="xp-text">0 / 100</span>
+        </div>
+        <div class="stat bounty-stat">
+          <span class="stat-label">BOUNTY</span>
+          <span id="bounty" class="stat-value gold">฿0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">STAMINA</span>
+          <span id="stamina" class="stat-value">100/100</span>
+          <div class="stamina-bar">
+            <div id="stamina-fill" class="stamina-fill"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Equipped Character -->
+      <section class="card equipped-card">
+        <h2>Current Captain</h2>
+        <div id="equipped-character" class="character-display">
+          <div class="char-avatar">🏴‍☠️</div>
+          <div class="char-info">
+            <div class="char-name">No one equipped</div>
+            <div class="char-desc">Buy a character in the shop!</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Task Creation & Timer -->
+      <section class="card task-card">
+        <h2>Set Sail (Focus Session)</h2>
+        
+        <div id="task-setup">
+          <div class="form-group">
+            <label for="task-name">What are you grinding?</label>
+            <input type="text" id="task-name" placeholder="e.g. Study JavaScript, Code feature, Read 20 pages..." maxlength="80" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-minutes">Duration (min)</label>
+              <select id="task-minutes">
+                <option value="15">15 min</option>
+                <option value="25" selected>25 min</option>
+                <option value="45">45 min</option>
+                <option value="50">50 min</option>
+                <option value="60">60 min</option>
+                <option value="90">90 min</option>
+              </select>
+            </div>
+            <button id="start-btn" class="btn primary">Start Focus</button>
+          </div>
+        </div>
+
+        <div id="timer-view" class="hidden">
+          <div class="current-task" id="current-task-name">—</div>
+          <div class="timer-display" id="timer-display">25:00</div>
+          <div class="timer-controls">
+            <button id="pause-btn" class="btn secondary">Pause</button>
+            <button id="complete-btn" class="btn success">Complete Session</button>
+            <button id="cancel-btn" class="btn danger">Cancel</button>
+          </div>
+          <p class="hint">Completing awards Bounty & XP. Cancel gives nothing.</p>
+        </div>
+      </section>
+
+      <!-- Character Shop -->
+      <section class="card shop-card">
+        <h2>Character Shop</h2>
+        <p class="shop-intro">Spend your hard-earned Bounty to unlock stronger captains. Higher tiers require serious grinding.</p>
+        <div id="shop-grid" class="shop-grid">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Inventory -->
+      <section class="card inventory-card">
+        <h2>Your Crew</h2>
+        <div id="inventory" class="inventory-grid">
+          <p class="empty-msg">No characters yet. Buy one from the shop!</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Grindline • Turn real work into pirate progression</p>
+    </footer>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
