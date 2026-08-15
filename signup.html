@@ -104,20 +104,24 @@
       btn.textContent = "Creating account...";
 
       try {
-        await signup(email, password, name, birthDate, gender);
+        await signup(email, password, name, birthDate);
         successEl.textContent = "Account created! Redirecting...";
         successEl.classList.add("visible");
         // onAuth will redirect to index.html
       } catch (err) {
-        let msg = "Signup failed. Please try again.";
+        // Show the real error so we can debug on phone
+        let msg = err.message || "Signup failed. Please try again.";
         if (err.code === "auth/email-already-in-use") {
           msg = "This email is already registered. Try logging in.";
         } else if (err.code === "auth/invalid-email") {
           msg = "Invalid email address.";
         } else if (err.code === "auth/weak-password") {
           msg = "Password is too weak.";
+        } else if (err.code === "permission-denied") {
+          msg = "Permission denied. Check Firestore rules (must be in test mode).";
         }
-        errorEl.textContent = msg;
+        // Always show code + message for debugging
+        errorEl.textContent = (err.code ? err.code + ": " : "") + msg;
         errorEl.classList.add("visible");
         btn.disabled = false;
         btn.textContent = "Create Account";
