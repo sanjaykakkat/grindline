@@ -125,21 +125,6 @@ body {
   padding: 0.5rem 0 0.25rem;
 }
 
-.hero-avatar {
-  width: 140px;
-  height: 140px;
-  margin: 0 auto 1rem;
-  background: linear-gradient(145deg, #fff7ed, #ffedd5);
-  border: 3px solid #fdba74;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-lg), 0 0 0 6px rgba(251, 146, 60, 0.12);
-  position: relative;
-  overflow: hidden;
-}
-
 /* ===== Character Image ===== */
 
 .character-container {
@@ -147,7 +132,7 @@ body {
   justify-content: center;
   align-items: flex-end;
   width: 100%;
-  min-height: 280px;
+  height: 220px;
   margin-bottom: 12px;
   overflow: hidden;
 }
@@ -155,16 +140,10 @@ body {
 #hero-image {
   display: block;
   width: auto;
-  height: 280px;
-  max-width: 90%;
+  height: 210px;
+  max-width: 80%;
   object-fit: contain;
   object-position: bottom center;
-}
-
-.hero-emoji {
-  font-size: 4.5rem;
-  line-height: 1;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
 }
 
 /* When you later add a real image:
