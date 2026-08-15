@@ -86,7 +86,8 @@
       const birthDate = document.getElementById("birth").value;
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
-
+      const gender = document.getElementById("gender").value;
+      
       if (!name || !birthDate || !email || !password) {
         errorEl.textContent = "Please fill in all fields.";
         errorEl.classList.add("visible");
@@ -103,7 +104,7 @@
       btn.textContent = "Creating account...";
 
       try {
-        await signup(email, password, name, birthDate);
+        await signup(email, password, name, birthDate, gender);
         successEl.textContent = "Account created! Redirecting...";
         successEl.classList.add("visible");
         // onAuth will redirect to index.html
