@@ -13,6 +13,10 @@ import {
   setDoc,
   getDoc,
   addDoc,
+  updateDoc,
+  getDocs,
+  query,
+  where,
   collection,
   Timestamp,
   serverTimestamp,
@@ -20,6 +24,26 @@ import {
 
 import { auth, db } from "./firebase.js";
 
+export async function getActiveFocusSession(uid) {
+  const q = query(
+    collection(db, "focusSessions"),
+    where("userId", "==", uid),
+    where("status", "==", "active")
+  );
+
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const docSnap = snapshot.docs[0];
+
+  return {
+    id: docSnap.id,
+    ...docSnap.data()
+  };
+}
 
 // ---------------- SIGNUP ----------------
 
