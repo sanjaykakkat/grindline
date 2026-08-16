@@ -450,6 +450,10 @@ async function startFocus() {
   console.log("✅ Focus session created:", sessionId);
 } catch (err) {
   console.error("❌ Failed to create focus session:", err);
+  console.error("Error name:", err?.name);
+  console.error("Error message:", err?.message);
+  console.error("Error stack:", err?.stack);
+
   showToast("Couldn't start the focus session.");
   return;
   }
