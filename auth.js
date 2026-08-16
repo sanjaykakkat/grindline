@@ -12,6 +12,9 @@ import {
   doc,
   setDoc,
   getDoc,
+  addDoc,
+  collection,
+  Timestamp,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
@@ -98,3 +101,37 @@ export async function saveUserData(uid, data) {
 
 
 export { auth, db };
+
+// ---------------- FOCUS SESSION ----------------
+
+export async function createFocusSession(
+  uid,
+  taskName,
+  durationMinutes
+) {
+  const now = new Date();
+
+  const endsAt = new Date(
+    now.getTime() + durationMinutes * 60 * 1000
+  );
+
+  const sessionRef = await addDoc(
+    collection(db, "focusSessions"),
+    {
+      userId: uid,
+      taskName: taskName,
+      durationMinutes: durationMinutes,
+
+      startedAt: Timestamp.fromDate(now),
+      endsAt: Timestamp.fromDate(endsAt),
+
+      status: "active",
+      rewardGranted: false,
+      notificationSent: false,
+
+      createdAt: serverTimestamp(),
+    }
+  );
+
+  return sessionRef.id;
+}
