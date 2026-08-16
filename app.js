@@ -745,17 +745,18 @@ onAuth(async (user) => {
 });
 
 // ------------- NOTIFICATION ------------------
+
 async function requestNotificationPermission() {
   if (!("Notification" in window)) {
-    console.log("Notifications are not supported.");
+    console.log("🔕 Notifications are not supported.");
     return;
   }
 
   if (Notification.permission === "default") {
-    await Notification.requestPermission();
+    const permission = await Notification.requestPermission();
+    console.log("Notification permission:", permission);
   }
 }
-
 
 function sendFocusCompleteNotification() {
   if (
@@ -769,6 +770,7 @@ function sendFocusCompleteNotification() {
   const { xp } = calculateRewards(currentTaskMinutes);
 
   new Notification("Focus session complete! 🔥", {
-    body: `You completed ${currentTaskMinutes} minutes of focus. +${xp} XP earned!`
+    body: `You completed ${currentTaskMinutes} minutes of focus. +${xp} XP earned!`,
+    icon: "IMG_20260816_200234.png"
   });
 }
