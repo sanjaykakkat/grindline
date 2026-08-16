@@ -1,6 +1,12 @@
 // ===== Grindline — Main App (Firebase + Game Logic) =====
 
-import { onAuth, loadUserData, saveUserData } from "./auth.js";
+import {
+  onAuth,
+  loadUserData,
+  saveUserData,
+  createFocusSession
+} from "./auth.js";
+
 import { characters } from "./characters.js";
 
 // ---------- Stamina config ----------
