@@ -757,7 +757,18 @@ onAuth(async (user) => {
   }
 });
 
-// ------------- NOTIFICATION ------------------
+// ---------- Notification ----------
+async function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    console.log("🔕 Notifications are not supported.");
+    return;
+  }
+
+  if (Notification.permission === "default") {
+    const permission = await Notification.requestPermission();
+    console.log("Notification permission:", permission);
+  }
+}
 
 async function sendFocusCompleteNotification() {
   if (!("Notification" in window)) {
@@ -775,11 +786,14 @@ async function sendFocusCompleteNotification() {
   try {
     const registration = await navigator.serviceWorker.ready;
 
-    await registration.showNotification("Focus session complete! 🔥", {
-      body: `You completed ${currentTaskMinutes} minutes of focus. +${xp} XP earned!`,
-      icon: "1000065061.ico",
-      badge: "./assets/icon.png"
-    });
+    await registration.showNotification(
+      "Focus session complete! 🔥",
+      {
+        body: `You completed ${currentTaskMinutes} minutes of focus. +${xp} XP earned!`,
+        icon: "./assets/icon.png",
+        badge: "./assets/icon.png"
+      }
+    );
 
   } catch (err) {
     console.error("🔔 Notification failed:", err);
