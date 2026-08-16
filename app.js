@@ -727,7 +727,8 @@ onAuth(async (user) => {
 
     showApp();
     updateUI();
-
+    
+    await requestNotificationPermission();
     await resumeActiveSession();
 
     // Bind events
@@ -755,17 +756,6 @@ async function requestNotificationPermission() {
   }
 }
 
-function sendFocusCompleteNotification() {
-  if (
-    "Notification" in window &&
-    Notification.permission === "granted"
-  ) {
-    new Notification("Focus session complete! 🔥", {
-      body: `You completed ${currentTaskMinutes} minutes of focus. +${calculateRewards(currentTaskMinutes).xp} XP earned!`,
-      icon: "./assets/icon.png"
-    });
-  }
-}
 
 function sendFocusCompleteNotification() {
   if (
