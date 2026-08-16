@@ -30,6 +30,20 @@ let saveTimeout = null;
 let currentSessionId = null;
 let currentSessionEndsAt = null;
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        "./service-worker.js"
+      );
+
+      console.log("✅ Service Worker registered:", registration.scope);
+    } catch (err) {
+      console.error("❌ Service Worker registration failed:", err);
+    }
+  });
+}
+
 // ---------- Helpers ----------
 function calcAge(birthDateStr) {
   if (!birthDateStr) return null;
