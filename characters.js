@@ -22,7 +22,7 @@ export const characters = {
     gender: "male",
     levelRequired: 5,
     tier: "rookie",
-    image: "./images/characters/luffy_002.png"
+    image: "https://res.cloudinary.com/wbr5igfj/image/upload/v1786891659/1786891604358.png"
   },
 
   luffy_003: {
