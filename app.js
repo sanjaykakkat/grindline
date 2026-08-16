@@ -4,7 +4,9 @@ import {
   onAuth,
   loadUserData,
   saveUserData,
-  createFocusSession
+  createFocusSession,
+  updateFocusSession,
+  getActiveFocusSession
 } from "./auth.js";
 
 import { characters } from "./characters.js";
@@ -527,6 +529,60 @@ function cancelSession() {
   showToast("Session cancelled. Stamina refunded.");
 }
 
+async function resumeActiveSession() {
+  try {
+    const session = await getActiveFocusSession(currentUser.uid);
+
+    if (!session) {
+      return;
+    }
+
+    console.log("🔄 Active session found:", session);
+
+    currentSessionId = session.id;
+    currentTaskName = session.taskName;
+    currentTaskMinutes = session.durationMinutes;
+
+    const now = Date.now();
+    const endTime = session.endsAt.toMillis();
+
+    remainingSeconds = Math.max(
+      0,
+      Math.ceil((endTime - now) / 1000)
+    );
+
+    // Session already ended while page was closed
+    if (remainingSeconds <= 0) {
+      await updateFocusSession(currentSessionId, {
+        status: "completed"
+      });
+
+      currentSessionId = null;
+      return;
+    }
+
+    // Restore timer UI
+    document.getElementById("task-setup").classList.add("hidden");
+    document.getElementById("timer-view").classList.remove("hidden");
+
+    document.getElementById("current-task-name").textContent =
+      currentTaskName;
+
+    document.getElementById("timer-display").textContent =
+      formatTime(remainingSeconds);
+
+    document.getElementById("pause-btn").textContent = "Pause";
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(tick, 1000);
+
+    console.log("✅ Focus session resumed");
+
+  } catch (err) {
+    console.error("❌ Failed to resume focus session:", err);
+  }
+}
+
 // ---------- Auth gate ----------
 function showApp() {
   document.getElementById("loading-screen").classList.add("hidden");
@@ -588,6 +644,8 @@ onAuth(async (user) => {
 
     showApp();
     updateUI();
+
+    await resumeActiveSession();
 
     // Bind events
     document.getElementById("start-btn").addEventListener("click", startFocus);
