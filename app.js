@@ -25,6 +25,7 @@ let isPaused = false;
 let currentTaskName = "";
 let currentTaskMinutes = 25;
 let saveTimeout = null;
+let currentSessionId = null;
 
 // ---------- Helpers ----------
 function calcAge(birthDateStr) {
@@ -413,7 +414,7 @@ function equipCharacter(id) {
 }
 
 // ---------- Focus session ----------
-function startFocus() {
+async function startFocus() {
   if (state.isResting) {
     showToast("You’re still resting. Wait for the timer.");
     return;
@@ -433,6 +434,20 @@ function startFocus() {
   currentTaskMinutes = minutes;
   remainingSeconds = minutes * 60;
   isPaused = false;
+
+  try {
+  const sessionId = await createFocusSession(
+    currentUser.uid,
+    currentTaskName,
+    currentTaskMinutes
+  );
+
+  console.log("✅ Focus session created:", sessionId);
+} catch (err) {
+  console.error("❌ Failed to create focus session:", err);
+  showToast("Couldn't start the focus session.");
+  return;
+  }
 
   document.getElementById("task-setup").classList.add("hidden");
   document.getElementById("timer-view").classList.remove("hidden");
