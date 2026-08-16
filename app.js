@@ -466,6 +466,12 @@ async function startFocus() {
   timerInterval = setInterval(tick, 1000);
 }
 
+export async function updateFocusSession(sessionId, data) {
+  const ref = doc(db, "focusSessions", sessionId);
+
+  await updateDoc(ref, data);
+}
+
 function tick() {
   if (isPaused) return;
 
@@ -479,10 +485,9 @@ function tick() {
   document.getElementById("timer-display").textContent =
     formatTime(remaining);
 
-  if (remaining <= 0) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-    completeSession();
+  if (remainingSeconds <= 0) {
+  await completeSession();
+  return;
   }
 }
 
@@ -491,12 +496,38 @@ function togglePause() {
   document.getElementById("pause-btn").textContent = isPaused ? "Resume" : "Pause";
 }
 
-function completeSession() {
+async function completeSession() {
   clearInterval(timerInterval);
   timerInterval = null;
 
+  // Prevent completing the same session twice
+  if (!currentSessionId) {
+    console.warn("⚠️ No active session ID.");
+    return;
+  }
+
+  try {
+    // Mark session completed in Firestore
+    await updateFocusSession(currentSessionId, {
+      status: "completed",
+      rewardGranted: true,
+      completedAt: new Date()
+    });
+
+    console.log("✅ Focus session completed:", currentSessionId);
+
+  } catch (err) {
+    console.error("❌ Failed to complete focus session:", err);
+    showToast("Couldn't save your completed session.");
+    return;
+  }
+
+  // ---------------- REWARD ----------------
+
   const minutes = currentTaskMinutes;
+
   const { bounty, xp } = calculateRewards(minutes);
+
   const { leveledUp, newlyUnlocked } = addXP(xp);
 
   state.bounty += bounty;
@@ -504,23 +535,39 @@ function completeSession() {
   state.totalSessions += 1;
 
   if (newlyUnlocked.length > 0) {
-  state.currentCharacterId = newlyUnlocked[newlyUnlocked.length - 1].id;
+    state.currentCharacterId =
+      newlyUnlocked[newlyUnlocked.length - 1].id;
   }
 
   queueSave();
 
+  // Clear current session
+  currentSessionId = null;
+  currentSessionEndsAt = null;
+
+  // Restore UI
   document.getElementById("timer-view").classList.add("hidden");
   document.getElementById("task-setup").classList.remove("hidden");
   document.getElementById("task-name").value = "";
 
   updateUI();
 
-  let msg = `+${formatBounty(bounty)}  ·  +${xp} XP`;
-  if (leveledUp) msg += `  ·  LEVEL ${state.level}!`;
-  if (newlyUnlocked.length > 0) {
-    msg += `  ·  New character: ${newlyUnlocked[newlyUnlocked.length - 1].name}`;
+  let msg = `+${formatBounty(bounty)} · +${xp} XP`;
+
+  if (leveledUp) {
+    msg += ` · LEVEL ${state.level}!`;
   }
-  showToast(msg, newlyUnlocked.length ? "success" : "gold");
+
+  if (newlyUnlocked.length > 0) {
+    msg += ` · New character: ${
+      newlyUnlocked[newlyUnlocked.length - 1].name
+    }`;
+  }
+
+  showToast(
+    msg,
+    newlyUnlocked.length ? "success" : "gold"
+  );
 }
 
 function cancelSession() {
