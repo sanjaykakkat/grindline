@@ -159,3 +159,14 @@ export async function createFocusSession(
 
   return sessionRef.id;
 }
+
+// ---------------- UPDATE FOCUS SESSION ----------------
+
+export async function updateFocusSession(sessionId, data) {
+  const ref = doc(db, "focusSessions", sessionId);
+
+  await updateDoc(ref, {
+    ...data,
+    updatedAt: serverTimestamp(),
+  });
+}
