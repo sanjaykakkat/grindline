@@ -508,22 +508,21 @@ async function completeSession() {
   }
 
   try {
-    // Mark session completed in Firestore
-    await updateFocusSession(currentSessionId, {
-      status: "completed",
-      rewardGranted: true,
-      completedAt: new Date()
-    });
-    
-    sendFocusCompleteNotification();
-    
-    console.log("✅ Focus session completed:", currentSessionId);
+  await updateFocusSession(currentSessionId, {
+    status: "completed",
+    rewardGranted: true,
+    completedAt: new Date()
+  });
 
-  } catch (err) {
-    console.error("❌ Failed to complete focus session:", err);
-    showToast("Couldn't save your completed session.");
-    return;
-  }
+  console.log("✅ Focus session completed:", currentSessionId);
+
+} catch (err) {
+  console.error("❌ Failed to complete focus session:", err);
+  showToast("Couldn't save your completed session.");
+  return;
+}
+
+sendFocusCompleteNotification();
   
 
   // ---------------- REWARD ----------------
@@ -746,31 +745,29 @@ onAuth(async (user) => {
 
 // ------------- NOTIFICATION ------------------
 
-async function requestNotificationPermission() {
+async function sendFocusCompleteNotification() {
   if (!("Notification" in window)) {
     console.log("🔕 Notifications are not supported.");
     return;
   }
 
-  if (Notification.permission === "default") {
-    const permission = await Notification.requestPermission();
-    console.log("Notification permission:", permission);
-  }
-}
-
-function sendFocusCompleteNotification() {
-  if (
-    !("Notification" in window) ||
-    Notification.permission !== "granted"
-  ) {
-    console.log("🔕 Notifications are not allowed.");
+  if (Notification.permission !== "granted") {
+    console.log("🔕 Notification permission not granted.");
     return;
   }
 
   const { xp } = calculateRewards(currentTaskMinutes);
 
-  new Notification("Focus session complete! 🔥", {
-    body: `You completed ${currentTaskMinutes} minutes of focus. +${xp} XP earned!`,
-    icon: "IMG_20260816_200234.png"
-  });
+  try {
+    const registration = await navigator.serviceWorker.ready;
+
+    await registration.showNotification("Focus session complete! 🔥", {
+      body: `You completed ${currentTaskMinutes} minutes of focus. +${xp} XP earned!`,
+      icon: "./assets/icon.png",
+      badge: "./assets/icon.png"
+    });
+
+  } catch (err) {
+    console.error("🔔 Notification failed:", err);
+  }
 }
