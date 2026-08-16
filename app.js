@@ -777,7 +777,7 @@ async function sendFocusCompleteNotification() {
 
     await registration.showNotification("Focus session complete! 🔥", {
       body: `You completed ${currentTaskMinutes} minutes of focus. +${xp} XP earned!`,
-      icon: "./assets/icon.png",
+      icon: "1000065061.ico",
       badge: "./assets/icon.png"
     });
 
