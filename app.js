@@ -445,9 +445,11 @@ async function startFocus() {
   currentTaskMinutes
 );
 
-    currentSessionEndsAt = Date.now() + currentTaskMinutes * 60 * 1000;
+currentSessionEndsAt =
+  Date.now() + currentTaskMinutes * 60 * 1000;
+
+console.log("✅ Focus session created:", currentSessionId);
     
-  console.log("✅ Focus session created:", sessionId);
 } catch (err) {
   console.error("❌ Failed to create focus session:", err);
   console.error("Error name:", err?.name);
