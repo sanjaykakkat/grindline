@@ -45,7 +45,7 @@ export const characters = {
     gender: "female",
     levelRequired: 1,
     tier: "fake",
-    image: "./images/characters/nami_001.png"
+    image: "https://res.cloudinary.com/wbr5igfj/image/upload/v1786889634/1786807061688.png"
   },
 
   nami_002: {
