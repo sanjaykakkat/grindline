@@ -28,6 +28,7 @@ let currentTaskName = "";
 let currentTaskMinutes = 25;
 let saveTimeout = null;
 let currentSessionId = null;
+let currentSessionEndsAt = null;
 
 // ---------- Helpers ----------
 function calcAge(birthDateStr) {
@@ -467,11 +468,18 @@ async function startFocus() {
 
 function tick() {
   if (isPaused) return;
-  remainingSeconds -= 1;
-  document.getElementById("timer-display").textContent =
-    formatTime(Math.max(0, remainingSeconds));
 
-  if (remainingSeconds <= 0) {
+  const remaining = Math.max(
+    0,
+    Math.ceil((currentSessionEndsAt - Date.now()) / 1000)
+  );
+
+  remainingSeconds = remaining;
+
+  document.getElementById("timer-display").textContent =
+    formatTime(remaining);
+
+  if (remaining <= 0) {
     clearInterval(timerInterval);
     timerInterval = null;
     completeSession();
@@ -543,13 +551,34 @@ async function resumeActiveSession() {
     currentTaskName = session.taskName;
     currentTaskMinutes = session.durationMinutes;
 
-    const now = Date.now();
     const endTime = session.endsAt.toMillis();
+
+    currentSessionEndsAt = endTime;
 
     remainingSeconds = Math.max(
       0,
-      Math.ceil((endTime - now) / 1000)
+      Math.ceil((endTime - Date.now()) / 1000)
     );
+
+    // Show timer
+    document.getElementById("task-setup").classList.add("hidden");
+    document.getElementById("timer-view").classList.remove("hidden");
+
+    document.getElementById("current-task-name").textContent =
+      currentTaskName;
+
+    document.getElementById("timer-display").textContent =
+      formatTime(remainingSeconds);
+
+    isPaused = false;
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(tick, 1000);
+
+  } catch (err) {
+    console.error("Failed to resume session:", err);
+  }
+}
 
     // Session already ended while page was closed
     if (remainingSeconds <= 0) {
