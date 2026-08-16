@@ -766,3 +766,19 @@ function sendFocusCompleteNotification() {
     });
   }
 }
+
+function sendFocusCompleteNotification() {
+  if (
+    !("Notification" in window) ||
+    Notification.permission !== "granted"
+  ) {
+    console.log("🔕 Notifications are not allowed.");
+    return;
+  }
+
+  const { xp } = calculateRewards(currentTaskMinutes);
+
+  new Notification("Focus session complete! 🔥", {
+    body: `You completed ${currentTaskMinutes} minutes of focus. +${xp} XP earned!`
+  });
+}
