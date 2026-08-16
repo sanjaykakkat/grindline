@@ -439,12 +439,14 @@ async function startFocus() {
   isPaused = false;
 
   try {
-  const sessionId = await createFocusSession(
-    currentUser.uid,
-    currentTaskName,
-    currentTaskMinutes
-  );
+  currentSessionId = await createFocusSession(
+  currentUser.uid,
+  currentTaskName,
+  currentTaskMinutes
+);
 
+    currentSessionEndsAt = Date.now() + currentTaskMinutes * 60 * 1000;
+    
   console.log("✅ Focus session created:", sessionId);
 } catch (err) {
   console.error("❌ Failed to create focus session:", err);
@@ -466,13 +468,7 @@ async function startFocus() {
   timerInterval = setInterval(tick, 1000);
 }
 
-export async function updateFocusSession(sessionId, data) {
-  const ref = doc(db, "focusSessions", sessionId);
-
-  await updateDoc(ref, data);
-}
-
-function tick() {
+async function tick() {
   if (isPaused) return;
 
   const remaining = Math.max(
@@ -486,8 +482,7 @@ function tick() {
     formatTime(remaining);
 
   if (remainingSeconds <= 0) {
-  await completeSession();
-  return;
+    await completeSession();
   }
 }
 
