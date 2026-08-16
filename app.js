@@ -514,7 +514,9 @@ async function completeSession() {
       rewardGranted: true,
       completedAt: new Date()
     });
-
+    
+    sendFocusCompleteNotification();
+    
     console.log("✅ Focus session completed:", currentSessionId);
 
   } catch (err) {
@@ -522,6 +524,7 @@ async function completeSession() {
     showToast("Couldn't save your completed session.");
     return;
   }
+  
 
   // ---------------- REWARD ----------------
 
@@ -739,4 +742,27 @@ onAuth(async (user) => {
     showToast("Failed to load your data.");
   }
 });
-  
+
+// ------------- NOTIFICATION ------------------
+async function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    console.log("Notifications are not supported.");
+    return;
+  }
+
+  if (Notification.permission === "default") {
+    await Notification.requestPermission();
+  }
+}
+
+function sendFocusCompleteNotification() {
+  if (
+    "Notification" in window &&
+    Notification.permission === "granted"
+  ) {
+    new Notification("Focus session complete! 🔥", {
+      body: `You completed ${currentTaskMinutes} minutes of focus. +${calculateRewards(currentTaskMinutes).xp} XP earned!`,
+      icon: "./assets/icon.png"
+    });
+  }
+}
