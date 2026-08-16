@@ -565,17 +565,51 @@ async function completeSession() {
   );
 }
 
-function cancelSession() {
+async function cancelSession() {
   clearInterval(timerInterval);
   timerInterval = null;
 
+  // Make sure there is actually an active session
+  if (!currentSessionId) {
+    console.warn("⚠️ No active session to cancel.");
+    return;
+  }
+
+  try {
+    // Mark the session as cancelled in Firestore
+    await updateFocusSession(currentSessionId, {
+      status: "cancelled",
+      cancelledAt: new Date()
+    });
+
+    console.log("❌ Focus session cancelled:", currentSessionId);
+
+  } catch (err) {
+    console.error("❌ Failed to cancel focus session:", err);
+    showToast("Couldn't cancel the focus session.");
+    return;
+  }
+
+  // Refund stamina
   const { staminaCost } = calculateRewards(currentTaskMinutes);
-  state.stamina = Math.min(state.maxStamina, state.stamina + staminaCost);
+
+  state.stamina = Math.min(
+    state.maxStamina,
+    state.stamina + staminaCost
+  );
+
   queueSave();
 
+  // Clear current session
+  currentSessionId = null;
+  currentSessionEndsAt = null;
+
+  // Restore setup UI
   document.getElementById("timer-view").classList.add("hidden");
   document.getElementById("task-setup").classList.remove("hidden");
+
   updateUI();
+
   showToast("Session cancelled. Stamina refunded.");
 }
 
