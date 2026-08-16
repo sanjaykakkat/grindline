@@ -580,37 +580,6 @@ async function resumeActiveSession() {
   }
 }
 
-    // Session already ended while page was closed
-    if (remainingSeconds <= 0) {
-      await updateFocusSession(currentSessionId, {
-        status: "completed"
-      });
-
-      currentSessionId = null;
-      return;
-    }
-
-    // Restore timer UI
-    document.getElementById("task-setup").classList.add("hidden");
-    document.getElementById("timer-view").classList.remove("hidden");
-
-    document.getElementById("current-task-name").textContent =
-      currentTaskName;
-
-    document.getElementById("timer-display").textContent =
-      formatTime(remainingSeconds);
-
-    document.getElementById("pause-btn").textContent = "Pause";
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(tick, 1000);
-
-    console.log("✅ Focus session resumed");
-
-  } catch (err) {
-    console.error("❌ Failed to resume focus session:", err);
-  }
-}
 
 // ---------- Auth gate ----------
 function showApp() {
