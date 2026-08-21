@@ -54,7 +54,7 @@ export const characters = {
     gender: "female",
     levelRequired: 5,
     tier: "rookie",
-    image: "./images/characters/nami_002.png"
+    image: "https://res.cloudinary.com/wbr5igfj/image/upload/v1787299298/1787299193823.png"
   },
 
   nami_003: {
