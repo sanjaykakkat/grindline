@@ -563,3 +563,61 @@ input:focus, select:focus {
     font-size: 2.75rem;
   }
 }
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  padding: 8px 6px;
+  box-sizing: border-box;
+
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+
+  z-index: 1000;
+}
+
+.nav-item {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 3px;
+
+  background: transparent;
+  border: none;
+
+  color: var(--text-muted);
+
+  font: inherit;
+  cursor: pointer;
+
+  padding: 6px 4px;
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.nav-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.nav-item.active {
+  color: var(--gold);
+}
+
+.nav-item:active {
+  transform: scale(0.95);
+}
