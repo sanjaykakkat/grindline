@@ -820,3 +820,25 @@ function setupNavigation() {
     });
   });
 }
+
+document.querySelectorAll(".nav-item").forEach((button) => {
+  button.addEventListener("click", () => {
+    const page = button.dataset.page;
+
+    if (page === "home") {
+      window.location.href = "index.html";
+    }
+
+    if (page === "crew") {
+      window.location.href = "crew.html";
+    }
+
+    if (page === "store") {
+      window.location.href = "store.html";
+    }
+
+    if (page === "settings") {
+      window.location.href = "settings.html";
+    }
+  });
+});
