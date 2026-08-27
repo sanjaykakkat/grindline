@@ -67,3 +67,27 @@ export const characters = {
   }
 
 };
+
+// =========================
+  // ZORO
+  // =========================
+
+zoro_001: {
+    id: "zoro_001",
+    name: "Zoro",
+    variation: "East Blue",
+    image: "./assets/zoro-east-blue.png",
+    gender: "male",
+    levelRequired: 1,
+    price: 250000
+  },
+
+  zoro_002: {
+    id: "zoro_002",
+    name: "Zoro",
+    variation: "Wano",
+    image: "./assets/zoro-wano.png",
+    gender: "male",
+    levelRequired: 1,
+    price: 1000000
+  }
