@@ -329,13 +329,11 @@ onAuth(async (user) => {
       .classList.remove("hidden");
 
 
-  } catch (error) {
-
-    console.error(
-      "Failed to load store:",
-      error
-    );
-
+  } catch (err) {
+  console.error("❌ Failed to load store:", err);
+  console.error("Error name:", err?.name);
+  console.error("Error message:", err?.message);
+  console.error("Error stack:", err?.stack);
   }
 
 });
