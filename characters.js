@@ -64,15 +64,14 @@ export const characters = {
     levelRequired: 10,
     tier: "strong",
     image: "./images/characters/nami_003.png"
-  }
+  },
 
-};
 
-// =========================
+  // =========================
   // ZORO
   // =========================
 
-zoro_001: {
+  zoro_001: {
     id: "zoro_001",
     name: "Zoro",
     variation: "East Blue",
@@ -91,3 +90,5 @@ zoro_001: {
     levelRequired: 1,
     price: 1000000
   }
+
+};
