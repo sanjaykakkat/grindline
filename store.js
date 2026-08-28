@@ -85,7 +85,7 @@ function renderStore() {
         >
 
         <span class="character-variation">
-          ${character.variation.toUpperCase()}
+          ${(character.variation ?? "Standard").toUpperCase()}
         </span>
 
       </div>
