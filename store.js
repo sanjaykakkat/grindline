@@ -80,7 +80,7 @@ function renderStore() {
 
         <img
           src="${character.image}"
-          alt="${character.name} ${character.variation}"
+          alt="${character.name} ${character.variation ?? "Standard"}"
           class="store-character-image"
         >
 
