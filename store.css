@@ -1,279 +1,590 @@
+/* =========================================
+   GRINDLINE — STORE
+========================================= */
+
 :root {
-  --bg: #f5f5f5;
-  --surface: #e9e9e9;
-  --card: #ffffff;
-  --text: #111111;
-  --text-muted: #666666;
-  --border: #d0d0d0;
+  --bg: #f7f8fc;
+  --bg-card: #ffffff;
+  --bg-elevated: #f0f2f8;
+
+  --border: #e2e6f0;
+
+  --text: #1a1d26;
+  --text-muted: #6b7280;
+
+  --gold: #e6a817;
+  --gold-dark: #c4890f;
+
+  --accent: #e11d48;
+  --accent-soft: #fff1f2;
+
+  --success: #16a34a;
+  --danger: #dc2626;
+
+  --radius: 16px;
+
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.08);
 }
+
+
+/* =========================================
+   RESET
+========================================= */
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
+
+/* =========================================
+   BODY
+========================================= */
+
 body {
-  margin: 0;
+  font-family: "Outfit", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-family: Arial, sans-serif;
+
+  min-height: 100vh;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+#loading-screen {
+  padding: 1rem;
+  font-size: 1rem;
+  color: var(--text);
 }
 
 .hidden {
   display: none !important;
 }
 
+
 /* =========================================
-   STORE PAGE
+   STORE APP
 ========================================= */
 
 #store-app {
-  min-height: 100vh;
-  padding: 24px 18px 110px;
+  max-width: 480px;
+
+  margin: 0 auto;
+
+  padding: 1rem 1rem 6rem;
 }
 
 
-/* ---------- Header ---------- */
+/* =========================================
+   HEADER
+========================================= */
 
 .store-header {
   display: flex;
+
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 32px;
+  align-items: stretch;
+
+  gap: 1rem;
+
+  margin-bottom: 1.75rem;
 }
 
-.store-label,
-.section-label,
-.bounty-label {
+
+/* ---------- Grindline Label ---------- */
+
+.store-label {
   margin: 0;
+
   font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
   color: var(--text-muted);
 }
 
+
+/* ---------- Store Title ---------- */
+
 .store-header h1 {
-  margin: 5px 0 0;
-  font-size: 2rem;
+  margin-top: 0.15rem;
+
+  font-size: 2.5rem;
   font-weight: 800;
+
+  line-height: 1.05;
+
+  letter-spacing: -0.04em;
 }
 
 
-/* ---------- Bounty Card ---------- */
+/* =========================================
+   BOUNTY
+========================================= */
 
 .bounty-card {
-  min-width: 110px;
-  padding: 12px 14px;
+  min-width: 125px;
+
+  padding: 0.85rem 1rem;
+
+  background: var(--bg-card);
+
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: var(--card);
+
+  box-shadow: var(--shadow);
+
   text-align: right;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
 }
+
+
+/* Label */
 
 .bounty-label {
   display: block;
-  margin-bottom: 4px;
-}
 
-#store-bounty {
-  font-size: 1.1rem;
-  font-weight: 800;
-}
+  margin-bottom: 0.25rem;
 
+  font-size: 0.65rem;
+  font-weight: 700;
 
-/* ---------- Intro ---------- */
+  letter-spacing: 0.1em;
 
-.store-intro {
-  margin-bottom: 36px;
-}
-
-.store-intro h2 {
-  margin: 0 0 8px;
-  font-size: 1.5rem;
-}
-
-.store-intro p {
-  margin: 0;
-  max-width: 500px;
-  line-height: 1.6;
   color: var(--text-muted);
 }
 
 
-/* ---------- Store Section ---------- */
+/* Value */
+
+#store-bounty {
+  font-size: 1.4rem;
+
+  font-weight: 800;
+
+  color: var(--gold-dark);
+
+  letter-spacing: -0.02em;
+}
+
+
+/* =========================================
+   INTRO
+========================================= */
+
+.store-intro {
+  margin-bottom: 2rem;
+}
+
+
+.store-intro h2 {
+  margin-bottom: 0.35rem;
+
+  font-size: 1.5rem;
+
+  font-weight: 700;
+
+  letter-spacing: -0.025em;
+}
+
+
+.store-intro p {
+  max-width: 430px;
+
+  font-size: 0.9rem;
+
+  line-height: 1.55;
+
+  color: var(--text-muted);
+}
+
+
+/* =========================================
+   STORE SECTION
+========================================= */
 
 .store-section {
   width: 100%;
 }
 
+
 .section-heading {
-  margin-bottom: 16px;
-}
-
-.section-heading h2 {
-  margin: 5px 0 0;
-  font-size: 1.3rem;
+  margin-bottom: 1rem;
 }
 
 
-/* ---------- Character Grid ---------- */
-
-.store-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-
-/* ---------- Character Card ---------- */
-
-.store-character-card {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--card);
-}
-
-
-/* ---------- Character Image ---------- */
-
-.character-image-wrap {
-  position: relative;
-  aspect-ratio: 1 / 1.15;
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.store-character-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.section-label {
   display: block;
-}
 
+  font-size: 0.7rem;
+  font-weight: 700;
 
-/* ---------- Variation Badge ---------- */
+  letter-spacing: 0.12em;
 
-.character-variation {
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-
-  padding: 5px 8px;
-
-  border-radius: 8px;
-
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-
-/* ---------- Character Info ---------- */
-
-.store-character-info {
-  padding: 12px;
-}
-
-.store-character-info h3 {
-  margin: 0;
-
-  font-size: 0.95rem;
-  font-weight: 800;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.store-character-info p {
-  margin: 4px 0 12px;
-
-  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 
-/* ---------- Buy Area ---------- */
+.section-heading h2 {
+  margin-top: 0.15rem;
+
+  font-size: 1.4rem;
+
+  font-weight: 800;
+
+  letter-spacing: -0.025em;
+}
+
+
+/* =========================================
+   CHARACTER GRID
+========================================= */
+
+.store-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 0.85rem;
+}
+
+
+/* =========================================
+   CHARACTER CARD
+========================================= */
+
+.store-character-card {
+  overflow: hidden;
+
+  background: var(--bg-card);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow);
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+.store-character-card:active {
+  transform: scale(0.98);
+}
+
+
+/* =========================================
+   CHARACTER IMAGE
+========================================= */
+
+.character-image-wrap {
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 1 / 1.15;
+
+  overflow: hidden;
+
+  background: var(--bg-elevated);
+}
+
+
+.store-character-image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* =========================================
+   VARIATION BADGE
+========================================= */
+
+.character-variation {
+  position: absolute;
+
+  left: 0.65rem;
+  bottom: 0.65rem;
+
+  padding: 0.3rem 0.55rem;
+
+  border-radius: 8px;
+
+  background: rgba(26, 29, 38, 0.78);
+
+  color: white;
+
+  font-size: 0.62rem;
+
+  font-weight: 800;
+
+  letter-spacing: 0.06em;
+
+  backdrop-filter: blur(4px);
+}
+
+
+/* =========================================
+   CHARACTER INFO
+========================================= */
+
+.store-character-info {
+  padding: 0.85rem;
+}
+
+
+.character-name-area h3 {
+  margin: 0;
+
+  font-size: 1rem;
+
+  font-weight: 700;
+
+  line-height: 1.2;
+}
+
+
+.character-name-area p {
+  margin-top: 0.15rem;
+
+  font-size: 0.75rem;
+
+  color: var(--text-muted);
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =========================================
+   BUY AREA
+========================================= */
 
 .character-buy-area {
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
-  gap: 8px;
+
+  gap: 0.5rem;
+
+  margin-top: 0.8rem;
 }
+
 
 .character-price {
   font-size: 0.85rem;
+
   font-weight: 800;
+
+  color: var(--gold-dark);
 }
 
 
-/* ---------- Buy Button ---------- */
+/* =========================================
+   BUY BUTTON
+========================================= */
 
 .buy-btn {
   border: none;
-  border-radius: 9px;
 
-  padding: 8px 11px;
+  border-radius: 10px;
 
-  background: var(--text);
-  color: var(--bg);
+  padding: 0.5rem 0.8rem;
+
+  background: linear-gradient(
+    135deg,
+    var(--gold-dark),
+    var(--gold)
+  );
+
+  color: #1a1200;
+
+  font-family: inherit;
 
   font-size: 0.72rem;
-  font-weight: 800;
+
+  font-weight: 700;
 
   cursor: pointer;
+
+  transition:
+    transform 0.12s,
+    opacity 0.15s;
 }
+
+
+.buy-btn:active {
+  transform: scale(0.96);
+}
+
 
 .buy-btn:disabled {
   opacity: 0.45;
+
   cursor: not-allowed;
 }
 
 
-/* ---------- Owned State ---------- */
+/* =========================================
+   OWNED
+========================================= */
 
 .store-character-card.owned {
-  opacity: 0.75;
+  opacity: 0.78;
 }
+
 
 .owned-badge {
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
 
-  padding: 8px 10px;
+  padding: 0.5rem 0.7rem;
+
+  background: var(--bg-elevated);
 
   border: 1px solid var(--border);
-  border-radius: 9px;
 
-  font-size: 0.7rem;
-  font-weight: 800;
+  border-radius: 10px;
 
   color: var(--text-muted);
+
+  font-size: 0.7rem;
+
+  font-weight: 700;
 }
 
 
-/* ---------- Desktop ---------- */
+/* =========================================
+   BOTTOM NAVIGATION
+========================================= */
+
+.bottom-nav {
+  position: fixed;
+
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+
+  display: flex;
+
+  justify-content: space-around;
+  align-items: center;
+
+  padding: 8px 6px;
+
+  background: var(--bg);
+
+  border-top: 1px solid var(--border);
+
+  z-index: 1000;
+}
+
+
+.nav-item {
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 3px;
+
+  background: transparent;
+
+  border: none;
+
+  color: var(--text-muted);
+
+  font: inherit;
+
+  text-decoration: none;
+
+  cursor: pointer;
+
+  padding: 6px 4px;
+
+  transition:
+    color 0.15s,
+    transform 0.12s;
+}
+
+
+.nav-icon {
+  font-size: 1.25rem;
+
+  line-height: 1;
+}
+
+
+.nav-item span:last-child {
+  font-size: 0.7rem;
+
+  font-weight: 700;
+}
+
+
+.nav-item.active {
+  color: var(--gold);
+}
+
+
+.nav-item:active {
+  transform: scale(0.95);
+}
+
+
+/* =========================================
+   DESKTOP
+========================================= */
 
 @media (min-width: 700px) {
 
   #store-app {
     max-width: 1000px;
-    margin: 0 auto;
-    padding: 40px 30px 120px;
+
+    padding: 2.5rem 2rem 7rem;
   }
 
-  .store-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
 
   .store-header h1 {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
+  }
+
+
+  .store-grid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+
+    gap: 1rem;
   }
 
 }
