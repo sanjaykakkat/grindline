@@ -86,7 +86,7 @@ export const characters = {
   zoro_001: {
     id: "zoro_001",
     name: "Zoro",
-    variation: "East Blue",
+    variation: "Village Zoro",
     image: "./assets/zoro-east-blue.png",
     gender: "male",
     levelRequired: 1,
