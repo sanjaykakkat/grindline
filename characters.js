@@ -75,7 +75,7 @@ export const characters = {
     levelRequired: 10,
     tier: "strong",
     price: 500000,
-    image: "./images/characters/nami_003.png"
+    image: "https://res.cloudinary.com/wbr5igfj/image/upload/v1788501842/1788501758155.png"
   },
 
 
