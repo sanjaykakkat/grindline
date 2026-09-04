@@ -87,7 +87,7 @@ export const characters = {
     id: "zoro_001",
     name: "Zoro",
     variation: "Village Zoro",
-    image: "./assets/zoro-east-blue.png",
+    image: "https://res.cloudinary.com/wbr5igfj/image/upload/v1788502841/1788502791998.png",
     gender: "male",
     levelRequired: 1,
     price: 250000
