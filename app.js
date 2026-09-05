@@ -144,19 +144,42 @@ function getCharactersForGender(gender) {
 }
 
 function checkCharacterUnlocks() {
-  const availableCharacters =
-    getCharactersForGender(state.gender);
 
   const newlyUnlocked = [];
 
-  availableCharacters.forEach((character) => {
+  Object.values(characters).forEach((character) => {
 
+    // Only characters unlocked through levels
+    if (character.unlockType !== "level") {
+      return;
+    }
+
+    // Male players level-unlock Luffy
     if (
-      character.levelRequired <= state.level &&
+      state.gender === "male" &&
+      character.name !== "Luffy"
+    ) {
+      return;
+    }
+
+    // Female players level-unlock Nami
+    if (
+      state.gender === "female" &&
+      character.name !== "Nami"
+    ) {
+      return;
+    }
+
+    // Check level requirement
+    if (
+      state.level >= character.levelRequired &&
       !state.unlockedCharacters.includes(character.id)
     ) {
+
       state.unlockedCharacters.push(character.id);
+
       newlyUnlocked.push(character);
+
     }
 
   });
